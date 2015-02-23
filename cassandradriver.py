@@ -83,6 +83,7 @@ class CassandraDriver(BaseDriver):
         row = result[0]
 
         row["id"] = str(row["id"])
+        row["last_modified"] = row["last_modified"].replace(microsecond=0)
 
         return row
 
@@ -113,5 +114,6 @@ class CassandraQuerySet(BaseQuerySet):
         row = next(self._result)
 
         row["id"] = str(row["id"])
+        row["last_modified"] = row["last_modified"].replace(microsecond=0)
 
         return row

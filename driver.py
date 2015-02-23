@@ -31,6 +31,25 @@ class Operation(object):
 
         return Operation(self.OPER_UPDATE, self.data)
 
+class Delta(object):
+    """
+    This class represents the batch operations needed to transform the state
+    of a certain driver into another.
+    """
+
+    driver = None
+    operations = None
+
+    def __init__(self, driver):
+        self.driver = driver
+        self.operations = []
+
+    def add_operation(self, operation):
+        self.operations.append(operation)
+
+    def apply(self):
+        pass
+
 class BaseDriver(object):
     """
     Base classe for drivers.
@@ -56,6 +75,26 @@ class BaseDriver(object):
         """
 
         raise NotImplementedError()
+
+    def build_delta(self, another_driver):
+        """
+        Generates the delta against the specified driver, the resulting delta
+        will transform the other driver into the same state of this one.
+        """
+
+        delta = Delta()
+        qs = self.get_queryset()
+
+        for row in qs:
+            another_row = another_driver.get_record(row["id"])
+
+            if another_row is None:
+                delta.add_operation(Operation(Operation.OPER_INSERT, row))
+
+            elif row["last_modified"] > another_row["last_modified"]:
+                delta.add_operation(Operation(Operation.OPER_UPDATE, row))
+
+        return delta
 
 class BaseQuerySet(object):
     """
