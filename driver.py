@@ -45,10 +45,19 @@ class Delta(object):
         self.operations = []
 
     def add_operation(self, operation):
+        """
+        Queue the specified operation.
+        """
+
         self.operations.append(operation)
 
     def apply(self):
-        pass
+        """
+        Apply all operations in this delta to the associated driver.
+        """
+
+        for op in self.operations:
+            self.driver.execute_operation(op)
 
 class BaseDriver(object):
     """
@@ -82,7 +91,7 @@ class BaseDriver(object):
         will transform the other driver into the same state of this one.
         """
 
-        delta = Delta()
+        delta = Delta(another_driver)
         qs = self.get_queryset()
 
         for row in qs:

@@ -89,10 +89,26 @@ class CassandraDriver(BaseDriver):
 
     def execute_operation(self, operation):
         if operation.oper_type == Operation.OPER_INSERT:
-            self._session.execute(self._prep_insert, operation.data)
+            self._session.execute(self._prep_insert, {
+                "id": UUID(operation.data["id"]),
+                "title": operation.data["title"],
+                "description": operation.data["description"],
+                "release_year": operation.data["release_year"],
+                "length": operation.data["length"],
+                "rating": operation.data["rating"],
+                "last_modified": operation.data["last_modified"],
+            })
 
         elif operation.oper_type == Operation.OPER_UPDATE:
-            self._session.execute(self._prep_update, operation.data)
+            self._session.execute(self._prep_update, {
+                "title": operation.data["title"],
+                "description": operation.data["description"],
+                "release_year": operation.data["release_year"],
+                "length": operation.data["length"],
+                "rating": operation.data["rating"],
+                "last_modified": operation.data["last_modified"],
+                "id": UUID(operation.data["id"]),
+            })
 
 class CassandraQuerySet(BaseQuerySet):
     """
