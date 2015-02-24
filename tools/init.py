@@ -6,11 +6,11 @@ from cassandra.cluster import Cluster
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
 
-lib_dir = os.path.dirname(os.path.abspath(__file__))
-os.sys.path.append(os.path.join(lib_dir, ".."))
+lib_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+os.sys.path.append(lib_dir)
 
 from util import *
-from importsakila import import_sakila_films
+from importfilms import import_films
 
 def init_cassandra():
     cass_cluster = Cluster(get_conf("CASSANDRA_CONTACT_POINTS"), \
@@ -104,4 +104,4 @@ if __name__ == "__main__":
 
     print "Importing initial data..."
 
-    import_sakila_films()
+    import_films()

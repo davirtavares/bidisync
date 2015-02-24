@@ -3,44 +3,24 @@
 import os
 from uuid import uuid4
 from datetime import datetime
+import cPickle as pickle
 
-lib_dir = os.path.dirname(os.path.abspath(__file__))
-os.sys.path.append(os.path.join(lib_dir, ".."))
+lib_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+os.sys.path.append(lib_dir)
 
-import MySQLdb as mysql
-from MySQLdb import cursors
 from cassandra.cluster import Cluster
 from elasticsearch import Elasticsearch
 
 from util import *
 
-def import_sakila_films():
-    mysql_conn = mysql.connect(
-            host="127.0.0.1",
-            user="root",
-            passwd="",
-            db="sakila",
-            cursorclass=cursors.DictCursor,
-            use_unicode=True,
-            charset="utf8"
-    )
+def import_films():
+    films = pickle.load(open(os.path.join(lib_dir, "films.pickle")))
 
     cass_cluster = Cluster(get_conf("CASSANDRA_CONTACT_POINTS"), \
             get_conf("CASSANDRA_PORT"))
     cass_session = cass_cluster.connect("simbiose")
 
     es_client = Elasticsearch(hosts=get_conf("ELASTICSEARCH_NODES"))
-
-    sel_cursor = mysql_conn.cursor()
-
-    sel_cursor.execute(
-        """
-        SELECT title, description, release_year, length, rating
-        FROM film
-        ORDER BY film_id
-        LIMIT 500
-        """
-    )
 
     insert_film = cass_session.prepare(
         """
@@ -65,9 +45,7 @@ def import_sakila_films():
         """
     )
 
-    row = sel_cursor.fetchone()
-
-    while row is not None:
+    for row in films[:500]:
         id = uuid4()
         last_modified = datetime.utcnow()
 
@@ -96,7 +74,5 @@ def import_sakila_films():
             id=id,
         )
 
-        row = sel_cursor.fetchone()
-
 if __name__ == "__main__":
-    import_sakila_films()
+    import_films()
