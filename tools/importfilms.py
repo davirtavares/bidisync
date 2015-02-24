@@ -45,7 +45,7 @@ def import_films():
         """
     )
 
-    for row in films[:1]:
+    for row in films[:500]:
         id = uuid4()
         last_modified = datetime.utcnow()
 
