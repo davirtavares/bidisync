@@ -23,7 +23,7 @@ def run():
                 get_conf("ELASTICSEARCH_DOC_TYPE"))
 
         es_delta = cd.build_delta(ed)
-        es.apply()
+        es_delta.apply()
 
         cas_delta = ed.build_delta(cd)
         cas_delta.apply()
